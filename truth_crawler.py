@@ -74,7 +74,7 @@ def main(jsonData):
         rawTitle = entry["link"][-1]["title"]
 
         dic = {
-            "label 1": "謠言澄清"
+            "label 1": "真實資訊"
         }
         try:
             dic["label 2"] = entry["category"][0]["term"]
@@ -100,23 +100,22 @@ def getPages(page):
     return pages
 
 result=[]
-pageUrl = "https://www.mygopen.com/feeds/posts/default/-/%E8%AC%A0%E8%A8%80?alt=json-in-script&start-index=1&max-results=7"
+pageUrl = "https://www.mygopen.com/feeds/posts/default/-/%E7%9C%9F%E5%AF%A6%E8%B3%87%E8%A8%8A?alt=json-in-script&start-index=1&max-results=7"
 pages = getPages(pageUrl)
 noRumor = 0
 noTruth = 0
 for p in range(pages):
     idx = 7*p+1
     print(idx)
-    url = "https://www.mygopen.com/feeds/posts/default/-/%E8%AC%A0%E8%A8%80?alt=json-in-script&start-index="+str(idx)+"&max-results=7"
+    url = "https://www.mygopen.com/feeds/posts/default/-/%E7%9C%9F%E5%AF%A6%E8%B3%87%E8%A8%8A?alt=json-in-script&start-index="+str(idx)+"&max-results=7"
     htmlData = getHtmlData(url)
     splited = htmlData.split('(',1)[1].rsplit(')',1)[0]
     jsonData = json.loads(splited)
     main(jsonData)
     time.sleep(5)
+
 ##test
-# noRumor = 0
-# noTruth = 0
-# url = "https://www.mygopen.com/feeds/posts/default/-/%E8%AC%A0%E8%A8%80?alt=json-in-script&start-index=554&max-results=7"
+# url = "https://www.mygopen.com/feeds/posts/default/-/%E7%9C%9F%E5%AF%A6%E8%B3%87%E8%A8%8A?alt=json-in-script&start-index=8&max-results=7"
 # htmlData = getHtmlData(url)
 # splited = htmlData.split('(',1)[1].rsplit(')',1)[0]
 # jsonData = json.loads(splited)
@@ -126,5 +125,5 @@ for p in range(pages):
 print("no rumor:"+str(noRumor)+",  no truth:"+str(noTruth))
 
 output = json.dumps(result, ensure_ascii=False).encode('utf8')
-with open("rumor.json",'w',encoding="utf-8") as f:
+with open("truth.json",'w',encoding="utf-8") as f:
     f.write(output.decode())
