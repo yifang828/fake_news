@@ -47,11 +47,15 @@ def getWsPos(wsList, posList, sentenceList):
         assert len(wsList[i])==len(posList[i])
         for word, pos in zip(wsList[i], posList[i]):
             resultStr += f'{word}({pos}) '
-            # print("resultStr: "+resultStr+"\n")
     return resultStr
 
+def getNer(wsList, posList):
+    nerList = ner(wsList, posList)
+    nerList = list(nerList[0])
+    return nerList
+
 resultList = []
-with open ('test.json') as jf:
+with open ('rumor.json') as jf:
     data = json.load(jf)
     for dic in data:
         resultDic ={}
@@ -62,8 +66,7 @@ with open ('test.json') as jf:
                 wsList = ws(sentenceList)
                 posList = pos(wsList)
                 resultDic['src_ws_pos'] = getWsPos(wsList, posList,sentenceList)
-                resultDic['src_ner'] = ner(wsList, posList).replace('(', '[').replace(')',']')
-                print(resultDic['src_ner'])
+                resultDic['src_ner'] = getNer(wsList, posList)
             elif k == "source" and m=="":
                 resultDic['src_ws_pos'] = ""
                 resultDic['src_ner'] = ""
@@ -72,16 +75,15 @@ with open ('test.json') as jf:
                 wsList = ws(sentenceList)
                 posList = pos(wsList)
                 resultDic['truth_ws_pos'] = getWsPos(wsList, posList, sentenceList)
-                resultDic['truth_ner'] = ner(wsList, posList).replace('(', '[').replace(')',']')
-                print(resultDic['truth_ner'])
+                resultDic['truth_ner'] = getNer(wsList, posList)
             elif k == "truth" and m=="":
                 resultDic['truth_ws_pos'] = ""
                 resultDic['truth_ner'] = ""
+        print(resultDic)
         resultList.append(resultDic)
-# print(resultList)
 jf.close()
 
 output = json.dumps(resultList, ensure_ascii=False).encode('utf8')
-with open("test_ws.json", 'w', encoding='utf-8')as f:
+with open("rumor_ws.json", 'w', encoding='utf-8')as f:
     f.write(output.decode())
 f.close()
