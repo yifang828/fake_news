@@ -1,7 +1,7 @@
 from ckiptagger import data_utils, construct_dictionary, WS, POS, NER
 import json
 
-# data_utils.download_data_gdown("./") ＃只要下載一次就好
+# data_utils.download_data_gdown("./") #只要下載一次就好
 ws= WS("./data")
 pos= POS("./data")
 ner= NER("./data")
@@ -20,7 +20,7 @@ def getNer(wsList, posList):
     return nerList
 
 resultList = []
-with open ('rumor.json') as jf:
+with open ('mygopen/truth.json') as jf:
     data = json.load(jf)
     for dic in data:
         resultDic ={}
@@ -49,6 +49,6 @@ with open ('rumor.json') as jf:
 jf.close()
 
 output = json.dumps(resultList, ensure_ascii=False).encode('utf8')
-with open("rumor_ws.json", 'w', encoding='utf-8')as f:
+with open("mygopen/truth_ws.json", 'w', encoding='utf-8')as f:
     f.write(output.decode())
 f.close()

@@ -4,6 +4,7 @@ import bs4
 import math
 import time
 import re
+import emoji
 
 def getHtmlData(url):
     request=req.Request(url, headers={
@@ -12,6 +13,26 @@ def getHtmlData(url):
     with req.urlopen(request) as resp:
         data=resp.read().decode("utf-8")
     return data
+
+def getEmoji(data):
+    result = ''
+    rumor = data.find("blockquote", class_="tr_bq")
+    if(rumor!=None):
+        result.join(c for c in rumor.get_text() if c in emoji.UNICODE_EMOJI)
+    quoteStyle = data.find("div", class_="quote_style")
+    if(quoteStyle!=None):
+        result.join(c for c in quoteStyle.get_text() if c in emoji.UNICODE_EMOJI)
+    yestrue = data.find("blockquote", class_="yestrue")
+    if(yestrue!=None):
+        result.join(c for c in yestrue.get_text() if c in emoji.UNICODE_EMOJI)
+    return result
+
+def textFilter(str):
+    filtEscapeChar = re.sub("\s", "", str)
+    text = emoji.demojize(filtEscapeChar)
+    filted = re.sub(':\S+?:', '', text)
+    return filted
+
 #label 3:
 def getLabel3(rawTitle):
     label3=""
@@ -36,8 +57,8 @@ def getLabel4NTitle(rawTitle):
     else:
         label4 = ""
         title = rawTitle
-    label4NTitle.append(label4)
-    label4NTitle.append(title)
+    label4NTitle.append(textFilter(label4))
+    label4NTitle.append(textFilter(title))
     return label4NTitle
             
 #source:
@@ -48,7 +69,7 @@ def rumorSrc(data):
         noRumor += 1
         return ""
     else:
-        return rumor.get_text()
+        return textFilter(rumor.get_text())
 
 #truth:
 def truth(data):
@@ -56,12 +77,12 @@ def truth(data):
     if(quoteStyle==None):
         quoteStyle =""
     else:
-        quoteStyle = quoteStyle.get_text()
+        quoteStyle = textFilter(quoteStyle.get_text())
     yestrue = data.find("blockquote", class_="yestrue")
     if(yestrue==None):
         yestrue =""
     else:
-        yestrue = yestrue.get_text()
+        yestrue = textFilter(yestrue.get_text())
     if((quoteStyle + yestrue)==""):
         global noTruth
         noTruth += 1
@@ -84,6 +105,7 @@ def main(jsonData):
             
             rumorData = getHtmlData(link)
             root=bs4.BeautifulSoup(rumorData, "html.parser")
+            dic["emoji"] = getEmoji(root)
             dic["source"] = rumorSrc(root)
             dic["truth"] = truth(root)
             result.append(dic)
@@ -112,7 +134,7 @@ for p in range(pages):
     splited = htmlData.split('(',1)[1].rsplit(')',1)[0]
     jsonData = json.loads(splited)
     main(jsonData)
-    time.sleep(5)
+    time.sleep(3)
 
 ##test
 # url = "https://www.mygopen.com/feeds/posts/default/-/%E7%9C%9F%E5%AF%A6%E8%B3%87%E8%A8%8A?alt=json-in-script&start-index=8&max-results=7"
@@ -125,5 +147,5 @@ for p in range(pages):
 print("no rumor:"+str(noRumor)+",  no truth:"+str(noTruth))
 
 output = json.dumps(result, ensure_ascii=False).encode('utf8')
-with open("truth.json",'w',encoding="utf-8") as f:
+with open("mygopen/truth.json",'w',encoding="utf-8") as f:
     f.write(output.decode())
